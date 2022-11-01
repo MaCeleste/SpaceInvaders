@@ -21,27 +21,54 @@ clock = pygame.time.Clock()
 fps = 60
 
 
+# Main game class
+class MAIN:
+    def __init__(self):
+        self.player = PLAYER()
+        self.bullet = BULLET()
+
+    def draw_elements(self):
+        self.player.draw_player()
+        self.bullet.draw_bullet(self.player.player_x_pos, self.player.player_y_pos)
+
+    def update(self):
+        self.player.move_player()
+
+
 # Player
 class PLAYER:
     def __init__(self):
         self.playerImg = pygame.image.load('spaceship.png')
-        self.movement = 0
-        self.x_pos = 370
-        self.y_pos = 480
+        self.player_movement = 0
+        self.player_x_pos = 370
+        self.player_y_pos = 480
 
-    def draw_player(self, x, y):
-        screen.blit(self.playerImg, (x, y))
+    def draw_player(self):
+        screen.blit(self.playerImg, (self.player_x_pos, self.player_y_pos))
 
     def move_player(self):
-        player.x_pos += player.movement
-        if player.x_pos < 0:
-            player.x_pos = 0
-        elif player.x_pos > 736:
-            player.x_pos = 736
+        self.player_x_pos = self.player_x_pos + self.player_movement
+        if self.player_x_pos < 0:
+            self.player_x_pos = 0
+        elif self.player_x_pos > 736:
+            self.player_x_pos = 736
 
-# Create instance of a player
 
-player = PLAYER()
+# Bullet
+class BULLET:
+    def __init__(self):
+        self.bulletImg = pygame.image.load('bullet.png')
+        self.movement = 0
+        self.bullet_fired = False
+
+    def draw_bullet(self, x, y):
+        if self.bullet_fired:
+            screen.blit(self.bulletImg, (x, y))
+
+
+# Create instance of a new game
+
+main_game = MAIN()
 
 # Game loop
 running = True
@@ -52,22 +79,24 @@ while running:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                player.movement = -5
+                main_game.player.player_movement = -5
             if event.key == pygame.K_RIGHT:
-                player.movement = 5
+                main_game.player.player_movement = 5
+            if event.key == pygame.K_SPACE:
+                main_game.bullet.bullet_fired = True
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                player.movement = 0
+                main_game.player.player_movement = 0
 
     # Screen and fps
     screen.fill((0, 0, 0))
     clock.tick(fps)
 
-    player.draw_player(player.x_pos, player.y_pos)
-    player.move_player()
+    # Draw elements on the screen and update them
+    main_game.draw_elements()
+    main_game.update()
 
     pygame.display.update()
