@@ -1,4 +1,4 @@
-import pygame, sys, random
+import pygame, sys, random, copy
 from pygame.math import Vector2
 
 # Initialise pygame
@@ -29,7 +29,7 @@ class MAIN:
 
     def draw_elements(self):
         self.player.draw_player()
-        self.bullet.draw_bullet(self.player.player_x_pos, self.player.player_y_pos)
+        self.bullet.fire_bullet(self.bullet.bullet_x_pos)
 
     def update(self):
         self.player.move_player()
@@ -58,12 +58,20 @@ class PLAYER:
 class BULLET:
     def __init__(self):
         self.bulletImg = pygame.image.load('bullet.png')
-        self.movement = 0
+        self.bullet_movement = 0
         self.bullet_fired = False
+        self.bullet_y_pos = 448
+        self.bullet_x_pos = 0
 
-    def draw_bullet(self, x, y):
+    def fire_bullet(self, x):
+        # Move bullet along the y-axis when it's fired
         if self.bullet_fired:
-            screen.blit(self.bulletImg, (x, y))
+            screen.blit(self.bulletImg, (x + 16, self.bullet_y_pos))
+            self.bullet_y_pos -= self.bullet_movement
+        # Reset bullet after it reaches the top of the screen
+        if self.bullet_y_pos <= 0:
+            self.bullet_fired = False
+            self.bullet_y_pos = 448
 
 
 # Create instance of a new game
@@ -85,7 +93,10 @@ while running:
             if event.key == pygame.K_RIGHT:
                 main_game.player.player_movement = 5
             if event.key == pygame.K_SPACE:
-                main_game.bullet.bullet_fired = True
+                if not main_game.bullet.bullet_fired:
+                    main_game.bullet.bullet_fired = True
+                    main_game.bullet.bullet_x_pos = main_game.player.player_x_pos
+                    main_game.bullet.bullet_movement = 10
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
