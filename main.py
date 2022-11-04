@@ -1,4 +1,4 @@
-import pygame, sys, random, copy
+import pygame, sys, random, math
 from pygame.math import Vector2
 
 # Initialise pygame
@@ -26,13 +26,14 @@ class MAIN:
     def __init__(self):
         self.player = PLAYER()
         self.bullet = BULLET()
+        self.alien = ALIEN()
 
     def draw_elements(self):
-        self.player.draw_player()
-        self.bullet.fire_bullet(self.bullet.bullet_x_pos)
-
-    def update(self):
         self.player.move_player()
+        self.bullet.fire_bullet(self.bullet.bullet_x_pos)
+        self.alien.move_alien()
+
+    def check_collision(self):
 
 
 # Player
@@ -43,15 +44,13 @@ class PLAYER:
         self.player_x_pos = 370
         self.player_y_pos = 480
 
-    def draw_player(self):
-        screen.blit(self.playerImg, (self.player_x_pos, self.player_y_pos))
-
     def move_player(self):
         self.player_x_pos = self.player_x_pos + self.player_movement
         if self.player_x_pos < 0:
             self.player_x_pos = 0
         elif self.player_x_pos > 736:
             self.player_x_pos = 736
+        screen.blit(self.playerImg, (self.player_x_pos, self.player_y_pos))
 
 
 # Bullet
@@ -72,6 +71,23 @@ class BULLET:
         if self.bullet_y_pos <= 0:
             self.bullet_fired = False
             self.bullet_y_pos = 448
+
+
+# Alien
+class ALIEN:
+    def __init__(self):
+        self.alienImg = pygame.image.load('alien.png')
+        self.alien_y_pos = 15
+        self.alien_x_pos = 0
+
+        self.alien_x_movement = 2
+
+    def move_alien(self):
+        self.alien_x_pos += self.alien_x_movement
+        if self.alien_x_pos > 736 or self.alien_x_pos < 0:
+            self.alien_x_movement *= -1
+            self.alien_y_pos += 32
+        screen.blit(self.alienImg, (self.alien_x_pos, self.alien_y_pos))
 
 
 # Create instance of a new game
@@ -108,6 +124,5 @@ while running:
 
     # Draw elements on the screen and update them
     main_game.draw_elements()
-    main_game.update()
 
     pygame.display.update()
