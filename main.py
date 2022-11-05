@@ -30,64 +30,66 @@ class MAIN:
 
     def draw_elements(self):
         self.player.move_player()
-        self.bullet.fire_bullet(self.bullet.bullet_x_pos)
+        self.bullet.fire_bullet(self.bullet.bulletRect.x)
         self.alien.move_alien()
 
-    def check_collision(self):
+    # def check_collision(self):
 
 
 # Player
 class PLAYER:
     def __init__(self):
-        self.playerImg = pygame.image.load('spaceship.png')
-        self.player_movement = 0
         self.player_x_pos = 370
         self.player_y_pos = 480
+        self.playerImg = pygame.image.load('spaceship.png')
+        self.playerRect = self.playerImg.get_rect(topleft=[self.player_x_pos, self.player_y_pos])
+        self.player_movement = 0
 
     def move_player(self):
-        self.player_x_pos = self.player_x_pos + self.player_movement
-        if self.player_x_pos < 0:
-            self.player_x_pos = 0
-        elif self.player_x_pos > 736:
-            self.player_x_pos = 736
-        screen.blit(self.playerImg, (self.player_x_pos, self.player_y_pos))
+        self.playerRect.x = self.playerRect.x + self.player_movement
+        if self.playerRect.x < 0:
+            self.playerRect.x = 0
+        elif self.playerRect.x > 736:
+            self.playerRect.x = 736
+        screen.blit(self.playerImg, self.playerRect)
 
 
 # Bullet
 class BULLET:
     def __init__(self):
+        self.bullet_y_pos = 448
+        self.bullet_x_pos = 100
         self.bulletImg = pygame.image.load('bullet.png')
+        self.bulletRect = self.bulletImg.get_rect(topleft=[self.bullet_x_pos, self.bullet_y_pos])
         self.bullet_movement = 0
         self.bullet_fired = False
-        self.bullet_y_pos = 448
-        self.bullet_x_pos = 0
 
     def fire_bullet(self, x):
         # Move bullet along the y-axis when it's fired
         if self.bullet_fired:
-            screen.blit(self.bulletImg, (x + 16, self.bullet_y_pos))
-            self.bullet_y_pos -= self.bullet_movement
+            screen.blit(self.bulletImg, self.bulletRect)
+            self.bulletRect.y -= self.bullet_movement
         # Reset bullet after it reaches the top of the screen
-        if self.bullet_y_pos <= 0:
+        if self.bulletRect.y <= 0:
             self.bullet_fired = False
-            self.bullet_y_pos = 448
+            self.bulletRect.y = 448
 
 
 # Alien
 class ALIEN:
     def __init__(self):
-        self.alienImg = pygame.image.load('alien.png')
         self.alien_y_pos = 15
         self.alien_x_pos = 0
-
+        self.alienImg = pygame.image.load('alien.png')
+        self.alienRect = self.alienImg.get_rect(topleft=[self.alien_x_pos, self.alien_y_pos])
         self.alien_x_movement = 2
 
     def move_alien(self):
-        self.alien_x_pos += self.alien_x_movement
-        if self.alien_x_pos > 736 or self.alien_x_pos < 0:
+        self.alienRect.x += self.alien_x_movement
+        if self.alienRect.x > 736 or self.alienRect.x < 0:
             self.alien_x_movement *= -1
-            self.alien_y_pos += 32
-        screen.blit(self.alienImg, (self.alien_x_pos, self.alien_y_pos))
+            self.alienRect.y += 32
+        screen.blit(self.alienImg, self.alienRect)
 
 
 # Create instance of a new game
@@ -111,7 +113,7 @@ while running:
             if event.key == pygame.K_SPACE:
                 if not main_game.bullet.bullet_fired:
                     main_game.bullet.bullet_fired = True
-                    main_game.bullet.bullet_x_pos = main_game.player.player_x_pos
+                    main_game.bullet.bulletRect.x = main_game.player.playerRect.x + 16
                     main_game.bullet.bullet_movement = 10
 
         if event.type == pygame.KEYUP:
