@@ -33,8 +33,9 @@ class MAIN:
         self.bullet.fire_bullet(self.bullet.bulletRect.x)
         self.alien.move_alien()
 
-    # def check_collision(self):
-
+    def check_collision(self):
+        if self.alien.alienRect.colliderect(self.bullet.bulletRect):
+            print('hey')
 
 # Player
 class PLAYER:
@@ -126,5 +127,6 @@ while running:
 
     # Draw elements on the screen and update them
     main_game.draw_elements()
+    main_game.check_collision()
 
     pygame.display.update()
