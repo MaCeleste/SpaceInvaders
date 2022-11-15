@@ -25,31 +25,52 @@ fps = 60
 class MAIN:
     def __init__(self):
         self.player = PLAYER()
-        self.bullet = BULLET()
         self.aliens = pygame.sprite.Group()
         self.create_aliens()
+        self.bullets = pygame.sprite.Group()
+        self.aliens_direction = 1
 
     def create_aliens(self):
-        for alien in range(10):
-            new_alien = ALIEN(random.randrange(0, 700), random.randrange(0, 250))
-            self.aliens.add(new_alien)
+        for row_index, row in enumerate(range(4)):
+            for col_index, col in enumerate(range(5)):
+                x = col_index * 80
+                y = row_index * 80
+                new_alien = ALIEN(x, y)
+                self.aliens.add(new_alien)
+
+    def move_aliens(self):
+        all_aliens = self.aliens.sprites()
+        for alien in all_aliens:
+            if alien.rect.right >= 800 or alien.rect.left <= 0:
+                self.aliens_direction = self.aliens_direction * -1
+                self.move_aliens_down()
+                break
+
+    def move_aliens_down(self):
+        all_aliens = self.aliens.sprites()
+        for alien in all_aliens:
+            alien.rect.y += 10
 
     def run(self):
         self.player.move_player()
-        self.bullet.fire_bullet(self.bullet.rect.x)
         self.aliens.draw(screen)
         # If statement added to check if there are any aliens on the screen left
         if self.aliens:
-            self.aliens.update()
+            self.aliens.update(self.aliens_direction)
+        self.move_aliens()
+        self.bullets.draw(screen)
+        self.bullets.update()
         self.check_collision()
 
+
+    def fire_bullet(self):
+        self.bullets.add(BULLET(self.player.playerRect.center))
+
     def check_collision(self):
-        if pygame.sprite.spritecollide(self.bullet, self.aliens, True):
-            self.bullet.kill()
+        for bullet in self.bullets:
+            if pygame.sprite.spritecollide(bullet, self.aliens, True):
+                bullet.kill()
 
-
-#     if self.alien.alienRect.colliderect(self.bullet.bulletRect):
-#        print('hey')
 
 # Player
 class PLAYER:
@@ -71,24 +92,19 @@ class PLAYER:
 
 # Bullet
 class BULLET(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, pos):
         super().__init__()
-        self.bullet_y_pos = 448
-        self.bullet_x_pos = 100
-        self.image = pygame.image.load('bullet.png')
-        self.rect = self.image.get_rect(topleft=[self.bullet_x_pos, self.bullet_y_pos])
-        self.bullet_movement = 0
+        self.image = pygame.Surface((4, 20))
+        self.image.fill('white')
+        self.rect = self.image.get_rect(center=pos)
+
+        self.bullet_movement = 2
         self.bullet_fired = False
 
-    def fire_bullet(self, x):
-        # Move bullet along the y-axis when it's fired
-        if self.bullet_fired:
-            screen.blit(self.image, self.rect)
-            self.rect.y -= self.bullet_movement
-        # Reset bullet after it reaches the top of the screen
-        if self.rect.y <= 0:
-            self.bullet_fired = False
-            self.rect.y = 448
+    def update(self):
+        self.rect.y -= 10
+        if self.rect.y <= 10:
+            self.kill()
 
 
 # Alien
@@ -97,15 +113,11 @@ class ALIEN(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load('alien.png')
         self.rect = self.image.get_rect(topleft=[x_pos, y_pos])
-        # self.alien_y_pos = 15
-        # self.alien_x_pos = 0
-        self.alien_x_movement = 2
+        self.speed = 2
 
-    def update(self):
-        self.rect.x += self.alien_x_movement
-        if self.rect.x > 736 or self.rect.x < 0:
-            self.alien_x_movement *= -1
-            self.rect.y += 32
+    def update(self, direction):
+        self.rect.x += direction
+
 
 
 # Create instance of a new game
@@ -127,10 +139,7 @@ while running:
             if event.key == pygame.K_RIGHT:
                 main_game.player.player_movement = 5
             if event.key == pygame.K_SPACE:
-                if not main_game.bullet.bullet_fired:
-                    main_game.bullet.bullet_fired = True
-                    main_game.bullet.rect.x = main_game.player.playerRect.x + 16
-                    main_game.bullet.bullet_movement = 10
+                main_game.fire_bullet()
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
